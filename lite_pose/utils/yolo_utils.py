@@ -11,7 +11,6 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 from typing import List, Tuple, Optional, Union, Dict
-import cv2
 
 
 def nms(
@@ -244,6 +243,7 @@ def letterbox(
     dh /= 2
 
     # 缩放
+    import cv2
     if shape[::-1] != new_unpad:
         img = cv2.resize(img, new_unpad, interpolation=cv2.INTER_LINEAR)
 
@@ -298,6 +298,7 @@ def draw_pose(
         ]
 
     # 绘制每个人
+    import cv2
     for i in range(len(keypoints)):
         kpts = keypoints[i]
 

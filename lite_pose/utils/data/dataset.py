@@ -8,7 +8,6 @@ YOLO-Pose 多人姿态检测数据集
 - 支持每张图片多人标注
 """
 
-import cv2
 import yaml
 import numpy as np
 import torch
@@ -130,6 +129,7 @@ class YOLOPoseDataset(Dataset):
 
     def _cache_images(self):
         """将图像缓存到内存"""
+        import cv2
         print(f"Caching {len(self.samples)} images...")
         for idx, (img_path, _) in enumerate(self.samples):
             self.cached_images[idx] = cv2.imread(str(img_path))
@@ -153,6 +153,7 @@ class YOLOPoseDataset(Dataset):
         img_path, label_path = self.samples[idx]
 
         # 加载图像
+        import cv2
         if self.cache_images and idx in self.cached_images:
             image = self.cached_images[idx].copy()
         else:
@@ -277,6 +278,7 @@ class YOLOPoseDataset(Dataset):
         image = self._letterbox(image, self.input_size)
 
         # BGR -> RGB
+        import cv2
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # 归一化
@@ -306,6 +308,7 @@ class YOLOPoseDataset(Dataset):
         new_h = int(h * scale)
 
         # 调整大小
+        import cv2
         resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
 
         # 创建画布并居中放置

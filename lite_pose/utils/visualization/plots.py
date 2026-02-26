@@ -2,10 +2,17 @@
 姿态检测可视化工具
 """
 
-import cv2
+import functools
 import numpy as np
 import torch
 from typing import List, Tuple, Optional
+
+
+@functools.lru_cache(maxsize=1)
+def _import_cv2():
+    """延迟导入 cv2，避免模块加载时触发 libtiff 库冲突"""
+    import cv2
+    return cv2
 
 
 # COCO骨架连接
@@ -85,8 +92,8 @@ def draw_keypoints(image: np.ndarray,
             continue
 
         color = colors[i % len(colors)]
-        cv2.circle(image, (x, y), radius, color, -1)
-        cv2.circle(image, (x, y), radius + 1, (255, 255, 255), 1)
+        _import_cv2().circle(image, (x, y), radius, color, -1)
+        _import_cv2().circle(image, (x, y), radius + 1, (255, 255, 255), 1)
 
     return image
 
@@ -137,7 +144,7 @@ def draw_skeleton(image: np.ndarray,
             continue
 
         color = colors[idx % len(colors)]
-        cv2.line(image, (x1, y1), (x2, y2), color, line_width)
+        _import_cv2().line(image, (x1, y1), (x2, y2), color, line_width)
 
     return image
 
@@ -204,14 +211,14 @@ def draw_heatmaps(heatmaps: np.ndarray,
     combined = (combined * 255).astype(np.uint8)
 
     # 应用colormap
-    heatmap_color = cv2.applyColorMap(combined, cv2.COLORMAP_JET)
+    heatmap_color = _import_cv2().applyColorMap(combined, _import_cv2().COLORMAP_JET)
 
     if image is not None:
         # 调整大小
         if image.shape[:2] != (height, width):
-            heatmap_color = cv2.resize(heatmap_color, (image.shape[1], image.shape[0]))
+            heatmap_color = _import_cv2().resize(heatmap_color, (image.shape[1], image.shape[0]))
         # 叠加
-        result = cv2.addWeighted(image, 1 - alpha, heatmap_color, alpha, 0)
+        result = _import_cv2().addWeighted(image, 1 - alpha, heatmap_color, alpha, 0)
     else:
         result = heatmap_color
 
@@ -253,12 +260,12 @@ def draw_individual_heatmaps(heatmaps: np.ndarray,
         hm = (hm * 255).astype(np.uint8)
 
         # 应用colormap
-        hm_color = cv2.applyColorMap(hm, cv2.COLORMAP_JET)
+        hm_color = _import_cv2().applyColorMap(hm, _import_cv2().COLORMAP_JET)
 
         # 添加标签
         if keypoint_names is not None:
-            cv2.putText(hm_color, keypoint_names[i], (5, 20),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            _import_cv2().putText(hm_color, keypoint_names[i], (5, 20),
+                       _import_cv2().FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
         y1, y2 = row * height, (row + 1) * height
         x1, x2 = col * width, (col + 1) * width
@@ -318,7 +325,7 @@ def draw_paf(paf: np.ndarray,
                 y2 = int((y + vy * stride) * scale_y)
 
                 color = SKELETON_COLORS[limb % len(SKELETON_COLORS)]
-                cv2.arrowedLine(canvas, (x1, y1), (x2, y2), color, 1, tipLength=0.3)
+                _import_cv2().arrowedLine(canvas, (x1, y1), (x2, y2), color, 1, tipLength=0.3)
 
     return canvas
 
@@ -408,15 +415,15 @@ def draw_bbox(image: np.ndarray,
     """
     image = image.copy()
     x1, y1, x2, y2 = map(int, bbox[:4])
-    cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
+    _import_cv2().rectangle(image, (x1, y1), (x2, y2), color, thickness)
 
     if label:
         font_scale = 0.5
         font_thickness = 1
-        (text_w, text_h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX,
+        (text_w, text_h), _ = _import_cv2().getTextSize(label, _import_cv2().FONT_HERSHEY_SIMPLEX,
                                                font_scale, font_thickness)
-        cv2.rectangle(image, (x1, y1 - text_h - 4), (x1 + text_w, y1), color, -1)
-        cv2.putText(image, label, (x1, y1 - 2), cv2.FONT_HERSHEY_SIMPLEX,
+        _import_cv2().rectangle(image, (x1, y1 - text_h - 4), (x1 + text_w, y1), color, -1)
+        _import_cv2().putText(image, label, (x1, y1 - 2), _import_cv2().FONT_HERSHEY_SIMPLEX,
                    font_scale, (255, 255, 255), font_thickness)
 
     return image
@@ -467,9 +474,9 @@ def draw_multi_person_pose(image: np.ndarray,
             if scores is not None:
                 label = f'{scores[i]:.2f}'
             x1, y1, x2, y2 = map(int, bboxes[i][:4])
-            cv2.rectangle(image, (x1, y1), (x2, y2), bbox_color, 2)
+            _import_cv2().rectangle(image, (x1, y1), (x2, y2), bbox_color, 2)
             if label:
-                cv2.putText(image, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX,
+                _import_cv2().putText(image, label, (x1, y1 - 5), _import_cv2().FONT_HERSHEY_SIMPLEX,
                            0.5, bbox_color, 1)
 
         # 绘制关键点和骨架
@@ -548,7 +555,7 @@ def visualize_val_samples(images: torch.Tensor,
                 draw_bbox=True
             )
         # 添加标签
-        cv2.putText(gt_img, 'GT', (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+        _import_cv2().putText(gt_img, 'GT', (10, 30), _import_cv2().FONT_HERSHEY_SIMPLEX,
                    1.0, (255, 100, 0), 2)
         canvas[:, :w] = gt_img
 
@@ -564,7 +571,7 @@ def visualize_val_samples(images: torch.Tensor,
                 draw_bbox=True
             )
         # 添加标签
-        cv2.putText(pred_img, 'Pred', (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
+        _import_cv2().putText(pred_img, 'Pred', (10, 30), _import_cv2().FONT_HERSHEY_SIMPLEX,
                    1.0, (0, 255, 100), 2)
         canvas[:, w + 10:] = pred_img
 
@@ -573,16 +580,16 @@ def visualize_val_samples(images: torch.Tensor,
     # 垂直拼接所有样本
     if vis_list:
         result = np.vstack(vis_list)
-        cv2.imwrite(save_path, result)
+        _import_cv2().imwrite(save_path, result)
 
 
 def save_visualization(image: np.ndarray, path: str):
     """保存可视化结果"""
-    cv2.imwrite(path, image)
+    _import_cv2().imwrite(path, image)
 
 
 def show_visualization(image: np.ndarray, window_name: str = 'Visualization'):
     """显示可视化结果"""
-    cv2.imshow(window_name, image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    _import_cv2().imshow(window_name, image)
+    _import_cv2().waitKey(0)
+    _import_cv2().destroyAllWindows()
