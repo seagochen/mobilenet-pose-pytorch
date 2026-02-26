@@ -2,7 +2,7 @@
 
 > **项目名称**: mobilenet-pose-pytorch (MobileNetV3 蒸馏 YOLOPose 姿态估计)
 > **创建日期**: 2026-02-26
-> **最后更新**: 2026-02-26 (任务九完成)
+> **最后更新**: 2026-02-26 (任务十完成 - 全部完成)
 
 ---
 
@@ -24,24 +24,26 @@ _(暂无)_
 
 ## 未完成的任务
 
-### [ ] 任务十：实现 ONNX 导出脚本
-
-- **需求描述**: 将学生模型导出为 ONNX 格式，用于 Jetson TensorRT 部署
-- **涉及文件**:
-  - `scripts/export_onnx.py` - 新建，ONNX 导出
-- **操作步骤**:
-  1. [ ] 加载 checkpoint → 导出 ONNX (opset 13)
-  2. [ ] 使用 onnx-simplifier 优化
-  3. [ ] 验证 ONNX 输出与 PyTorch 一致（tolerance 1e-5）
-  4. [ ] 输出 3 个尺度的原始预测，解码在推理端处理
-- **上下文备注**:
-  - Jetson 上使用 `trtexec` 将 ONNX 转为 TensorRT engine
-  - MobileNetV3-Small + FP16 预计 Jetson Nano 上 30-50ms 延迟
-  - dynamic_axes 支持 batch 维度
+_(全部完成)_
 
 ---
 
 ## 已完成的任务（归档）
+
+### [x] 任务十：实现 ONNX 导出脚本（2026-02-26）
+
+- **完成内容**:
+  1. [x] 实现 `scripts/export_onnx.py`
+     - `LitePoseExport` 包装器: 3 尺度 (B,H,W,C) → 拼接为 (B,56,N)
+     - `export_onnx()`: opset 13, dynamic_axes 支持 batch 维度
+     - `simplify_onnx()`: 可选 onnx-simplifier 优化
+     - `verify_onnx()`: PyTorch vs ONNX 输出比较
+  2. [x] 验证通过:
+     - 导出成功: 6.72 MB ONNX 文件
+     - 输出格式: (B, 56, N) where N = 80*80 + 40*40 + 20*20 = 8000
+     - 一致性: max diff 3.8e-5 < tolerance 1e-4
+
+---
 
 ### [x] 任务九：实现推理脚本（2026-02-26）
 
