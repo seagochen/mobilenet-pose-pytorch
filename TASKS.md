@@ -12,6 +12,7 @@
 |------|------|
 | **相关工程位置** | `/home/cxt/models/convnext-pose-pytorch` |
 | **开发环境** | `conda activate aigc` |
+| **数据集** | `/home/cxt/datasets/coco_pose_yolo` |
 | **YOLOPose 教师模型** | 用户提供 ONNX 文件，使用 onnxruntime 推理；**不要在 aigc 环境中安装 ultralytics** |
 
 ---

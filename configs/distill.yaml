@@ -1,0 +1,61 @@
+# LitePose Distillation Training Configuration
+# Usage:
+#   python scripts/train_distill.py --config configs/distill.yaml
+#   python scripts/train_distill.py --config configs/distill.yaml --lr 1e-3  # CLI overrides YAML
+#   python scripts/train_distill.py --config configs/distill.yaml --epochs 100 --batch-size 16
+
+# ===== Data =====
+data:
+  yaml_path: /home/cxt/datasets/coco_pose_yolo/data.yaml
+  img_size: 640
+  num_keypoints: 17
+
+# ===== Student Model =====
+model:
+  fpn_channels: 96
+  backbone_pretrained: true
+
+# ===== Teacher Model =====
+teacher:
+  onnx_path: yolo11s-pose.onnx
+  conf_thresh: 0.1            # 低阈值获取更多软标签
+
+# ===== Distillation =====
+distill:
+  weight_max: 1.0             # 蒸馏权重 (训练初期)
+  weight_min: 0.25            # 蒸馏权重 (训练后期), 线性衰减
+  box_weight: 1.0
+  score_weight: 1.0
+  kpt_weight: 2.0
+
+# ===== Training =====
+training:
+  epochs: 300
+  batch_size: 32
+  lr: 5.0e-4
+  weight_decay: 0.01
+  lr_scheduler: cosine        # 'cosine' or 'step'
+  warmup_epochs: 10
+  ema: true
+  ema_decay: 0.9999
+  freeze_backbone: true
+  freeze_epochs: 5
+  grad_clip: 10.0
+
+# ===== Output =====
+output:
+  dir: ./runs/train
+  project: exp
+  log_interval: 50            # 日志打印间隔 (步)
+  val_interval: 5             # 验证间隔 (轮)
+  save_interval: 10           # 保存间隔 (轮)
+
+# ===== Resume =====
+resume: null                  # 恢复训练: 检查点路径
+weights: null                 # 加载模型权重 (不恢复优化器)
+
+# ===== Misc =====
+misc:
+  num_workers: 4
+  seed: 42
+  device: cuda                # 'cuda' or 'cpu', 空字符串自动检测
