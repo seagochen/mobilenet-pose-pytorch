@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Training outputs
+runs/
+checkpoints/
+*.pt
+*.pth
+
+# ONNX models
+*.onnx
+
+# Data
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.mp4
+*.avi
+
+# Logs
+*.log
+tensorboard/
+
+# Jupyter
+.ipynb_checkpoints/
