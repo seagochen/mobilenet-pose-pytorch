@@ -129,10 +129,10 @@ class YOLOPoseDataset(Dataset):
 
     def _cache_images(self):
         """将图像缓存到内存"""
-        import cv2
+        from PIL import Image
         print(f"Caching {len(self.samples)} images...")
         for idx, (img_path, _) in enumerate(self.samples):
-            self.cached_images[idx] = cv2.imread(str(img_path))
+            self.cached_images[idx] = np.array(Image.open(str(img_path)).convert('RGB'))
             if (idx + 1) % 1000 == 0:
                 print(f"  Cached {idx + 1}/{len(self.samples)} images")
 
@@ -152,12 +152,13 @@ class YOLOPoseDataset(Dataset):
         """
         img_path, label_path = self.samples[idx]
 
-        # 加载图像
-        import cv2
+        # 加载图像 (PIL: 无 libtiff 库冲突)
+        from PIL import Image
         if self.cache_images and idx in self.cached_images:
             image = self.cached_images[idx].copy()
         else:
-            image = cv2.imread(str(img_path))
+            pil_img = Image.open(str(img_path)).convert('RGB')
+            image = np.array(pil_img)
 
         if image is None:
             raise RuntimeError(f"Failed to load image: {img_path}")
@@ -277,9 +278,7 @@ class YOLOPoseDataset(Dataset):
         # 调整大小 (letterbox 保持比例)
         image = self._letterbox(image, self.input_size)
 
-        # BGR -> RGB
-        import cv2
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # 已经是 RGB (PIL 加载)
 
         # 归一化
         image = image.astype(np.float32) / 255.0
@@ -307,9 +306,10 @@ class YOLOPoseDataset(Dataset):
         new_w = int(w * scale)
         new_h = int(h * scale)
 
-        # 调整大小
-        import cv2
-        resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+        # 调整大小 (PIL)
+        from PIL import Image
+        pil_img = Image.fromarray(image)
+        resized = np.array(pil_img.resize((new_w, new_h), Image.BILINEAR))
 
         # 创建画布并居中放置
         canvas = np.full((target_h, target_w, 3), 114, dtype=np.uint8)
