@@ -2,7 +2,7 @@
 
 > **项目名称**: mobilenet-pose-pytorch (MobileNetV3 蒸馏 YOLOPose 姿态估计)
 > **创建日期**: 2026-02-26
-> **最后更新**: 2026-02-26 (任务八完成)
+> **最后更新**: 2026-02-26 (任务九完成)
 
 ---
 
@@ -24,21 +24,6 @@ _(暂无)_
 
 ## 未完成的任务
 
-### [ ] 任务九：实现推理脚本
-
-- **需求描述**: 创建单图/视频推理脚本
-- **涉及文件**:
-  - `scripts/detect.py` - 新建，推理脚本
-- **操作步骤**:
-  1. [ ] 加载训练好的学生模型 checkpoint
-  2. [ ] 图像预处理 (letterbox resize, normalize)
-  3. [ ] 模型推理 → 解码 → NMS → 绘制骨架
-  4. [ ] 支持单图、目录、视频输入
-- **上下文备注**:
-  - 参考原工程 `scripts/detect.py`
-
----
-
 ### [ ] 任务十：实现 ONNX 导出脚本
 
 - **需求描述**: 将学生模型导出为 ONNX 格式，用于 Jetson TensorRT 部署
@@ -57,6 +42,17 @@ _(暂无)_
 ---
 
 ## 已完成的任务（归档）
+
+### [x] 任务九：实现推理脚本（2026-02-26）
+
+- **完成内容**:
+  1. [x] 实现 `scripts/detect.py`
+     - `MultiPersonPoseEstimator` 类: 加载 checkpoint (支持 EMA/model/raw)、letterbox 预处理、推理解码 NMS、坐标缩放回原图
+     - `process_image()` / `process_video()` / `process_camera()` / `process_directory()` 四种输入模式
+     - 命令行参数: weights, source/camera, output, conf/iou/kpt thresh, device
+  2. [x] Smoke test 通过: 加载 overfit checkpoint, 单图推理 55ms (CPU), 输出保存正常
+
+---
 
 ### [x] 任务八：实现训练入口脚本（2026-02-26）
 
