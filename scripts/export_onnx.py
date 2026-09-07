@@ -24,6 +24,7 @@ project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
 from lite_pose.models import LitePose
+from lite_pose.runtime import command
 
 
 def load_model(weights_path: str, num_keypoints: int = 17,
@@ -204,6 +205,7 @@ def parse_args():
     return parser.parse_args()
 
 
+@command("export")
 def main():
     args = parse_args()
 
@@ -247,4 +249,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

@@ -20,8 +20,10 @@ sys.path.insert(0, str(project_root))
 
 from lite_pose.training.config import get_parser, build_config
 from lite_pose.training.distill_trainer import DistillTrainer
+from lite_pose.runtime import command
 
 
+@command("train")
 def main():
     parser = get_parser()
     parser.add_argument('--debug-nan', action='store_true',
@@ -40,4 +42,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
